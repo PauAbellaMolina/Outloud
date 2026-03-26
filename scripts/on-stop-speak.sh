@@ -7,6 +7,17 @@ log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
 log "=== Hook fired ==="
 
+# Kill any ongoing speech from a previous response
+PID_FILE="/tmp/outloud-say.pid"
+if [ -f "$PID_FILE" ]; then
+    OLD_PID=$(cat "$PID_FILE")
+    if kill -0 "$OLD_PID" 2>/dev/null; then
+        kill "$OLD_PID" 2>/dev/null
+        log "Killed previous say process ($OLD_PID)"
+    fi
+    rm -f "$PID_FILE"
+fi
+
 # Prevent recursive calls — claude -p triggers Stop hooks too
 LOCK_FILE="/tmp/outloud.lock"
 if [ -f "$LOCK_FILE" ]; then
@@ -59,7 +70,8 @@ fi
 
 log "Speaking: $SUMMARY"
 
-# Speak in background so hook returns immediately
+# Speak in background so hook returns immediately, track PID for interruption
 say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
+echo $! > "$PID_FILE"
 
 exit 0
