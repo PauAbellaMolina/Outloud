@@ -10,7 +10,7 @@
     {
       "name": "outloud",
       "description": "Hear what Claude just did — spoken voice summaries after every response",
-      "source": ".",
+      "source": "./",
       "version": "1.0.0"
     }
   ]
