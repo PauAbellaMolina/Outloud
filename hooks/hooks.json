@@ -1,0 +1,16 @@
+{
+  "description": "Speaks a voice summary when Claude finishes responding",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/on-stop-speak.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

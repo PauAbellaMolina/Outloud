@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "outloud",
+  "version": "1.0.0",
+  "description": "Voice summaries for Claude Code",
+  "owner": {
+    "name": "Pau"
+  },
+  "plugins": [
+    {
+      "name": "outloud",
+      "description": "Hear what Claude just did — spoken voice summaries after every response",
+      "source": ".",
+      "version": "1.0.0"
+    }
+  ]
+}

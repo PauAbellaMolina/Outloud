@@ -1,0 +1,9 @@
+{
+  "name": "outloud",
+  "description": "Voice summaries for Claude Code — hear what Claude just did, spoken aloud",
+  "version": "1.0.0",
+  "author": {
+    "name": "Pau"
+  },
+  "homepage": "https://github.com/PauAbellaMolina/Outloud"
+}
