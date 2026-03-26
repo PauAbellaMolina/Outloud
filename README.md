@@ -22,11 +22,13 @@ Speech is automatically interrupted when you send your next message, or when a n
 
 ```
 /plugin marketplace add PauAbellaMolina/Outloud
+/plugin install outloud@PauAbellaMolina/Outloud
 ```
 
 ## Uninstall
 
 ```
+/plugin uninstall outloud
 /plugin marketplace remove PauAbellaMolina/Outloud
 ```
 
