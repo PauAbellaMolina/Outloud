@@ -8,15 +8,15 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 1. Claude finishes a response
 2. The response is summarized into 3-5 natural sentences (using Claude Haiku)
-3. The summary is spoken aloud via macOS `say`
+3. The summary is spoken aloud via OpenAI TTS (or macOS `say` as fallback)
 
 Speech is automatically interrupted when you send your next message, or when a new response arrives.
 
 ## Requirements
 
-- macOS (uses the built-in `say` command)
+- macOS
 - Claude Code CLI
-- `jq` installed (`brew install jq`)
+- `jq` — a lightweight JSON parser (`brew install jq`)
 
 ## Install
 
@@ -25,6 +25,16 @@ Speech is automatically interrupted when you send your next message, or when a n
 /plugin install outloud@PauAbellaMolina/Outloud
 ```
 
+## Voice setup
+
+By default, Outloud uses the built-in macOS `say` voice. For much better voice quality, add an OpenAI API key:
+
+```bash
+mkdir -p ~/.config && echo "OPENAI_API_KEY=your-key-here" > ~/.config/outloud.env
+```
+
+Get your key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+
 ## Uninstall
 
 ```
@@ -32,7 +42,7 @@ Speech is automatically interrupted when you send your next message, or when a n
 /plugin marketplace remove PauAbellaMolina/Outloud
 ```
 
-## Stopping speech manually
+## Stopping speech
 
 Send any new message to Claude and the voice stops automatically. You can also run:
 

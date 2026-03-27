@@ -7,6 +7,12 @@ log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
 log "=== Hook fired ==="
 
+# Load config (OpenAI API key)
+CONFIG_FILE="$HOME/.config/outloud.env"
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+fi
+
 # Kill any ongoing speech from a previous response
 PID_FILE="/tmp/outloud-say.pid"
 if [ -f "$PID_FILE" ]; then
@@ -70,8 +76,34 @@ fi
 
 log "Speaking: $SUMMARY"
 
-# Speak in background so hook returns immediately, track PID for interruption
-say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
-echo $! > "$PID_FILE"
+# Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
+AUDIO_FILE="/tmp/outloud-speech.mp3"
+
+if [ -n "$OPENAI_API_KEY" ]; then
+    log "Using OpenAI TTS"
+    HTTP_CODE=$(curl -s -o "$AUDIO_FILE" -w "%{http_code}" \
+        https://api.openai.com/v1/audio/speech \
+        -H "Authorization: Bearer $OPENAI_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n --arg text "$SUMMARY" '{
+            model: "tts-1",
+            voice: "nova",
+            input: $text,
+            response_format: "mp3"
+        }')" 2>/dev/null)
+
+    if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
+        afplay "$AUDIO_FILE" 2>/dev/null &
+        echo $! > "$PID_FILE"
+    else
+        log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
+        say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
+        echo $! > "$PID_FILE"
+    fi
+else
+    log "No OPENAI_API_KEY, using macOS say"
+    say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
+    echo $! > "$PID_FILE"
+fi
 
 exit 0
