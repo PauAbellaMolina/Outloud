@@ -27,9 +27,19 @@ fi
 # Prevent recursive calls — claude -p triggers Stop hooks too
 LOCK_FILE="/tmp/outloud.lock"
 if [ -f "$LOCK_FILE" ]; then
-    log "Skipping (recursive call)"
-    exit 0
+    # Clean up stale locks older than 60 seconds
+    if [ "$(find "$LOCK_FILE" -mmin +1 2>/dev/null)" ]; then
+        log "Removing stale lock"
+        rm -f "$LOCK_FILE"
+    else
+        log "Skipping (recursive call)"
+        exit 0
+    fi
 fi
+
+# Ensure lock is always cleaned up, even on crash
+cleanup() { rm -f "$LOCK_FILE"; }
+trap cleanup EXIT
 
 # Read hook input from stdin
 INPUT=$(cat)
@@ -64,7 +74,6 @@ if [ -n "$CLAUDE_BIN" ]; then
 
 Here's what Claude said:
 ${RESPONSE:0:4000}" | "$CLAUDE_BIN" -p --model haiku 2>/dev/null || true)
-    rm -f "$LOCK_FILE"
     log "claude summary: ${SUMMARY:0:200}"
 fi
 
