@@ -22,7 +22,10 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 By default, Outloud uses the built-in macOS `say` voice. For a much better voice, add an OpenAI API key:
 
 ```bash
-mkdir -p ~/.config && echo "OPENAI_API_KEY=your-key-here" > ~/.config/outloud.env
+mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
+OPENAI_API_KEY=your-key-here
+OUTLOUD_SPEED=1.5
+EOF
 ```
 
 Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (requires paid account).
