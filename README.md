@@ -10,11 +10,6 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 2. The response is summarized into 2-3 natural sentences (using Claude Haiku)
 3. The summary is spoken aloud via OpenAI TTS (or macOS `say` as fallback)
 
-## Requirements
-
-- macOS
-- Claude Code CLI
-
 ## Install
 
 ```
