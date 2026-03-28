@@ -28,7 +28,7 @@ OUTLOUD_SPEED=1.5
 EOF
 ```
 
-Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits to get started).
+Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits to get started with so TTS works).
 
 You can also configure playback speed in the same file:
 
