@@ -5,7 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired (v2.0.0) ==="
+log "=== Hook fired (v2.1.0) ==="
 
 # Load config (OpenAI API key)
 CONFIG_FILE="$HOME/.config/outloud.env"
@@ -62,10 +62,11 @@ if [ -n "$CLAUDE_BIN" ]; then
     SUMMARY=$(echo "You convert a coding AI's response into something that can be spoken aloud. No markdown, no code, no bullet points, no asterisks — just natural speech.
 
 Rules:
-- If Claude is ASKING A QUESTION or waiting for user input, always clearly state the question. This is the most important thing to communicate — the user needs to know what they're being asked.
+- First, decide if this response is worth reading aloud. Routine confirmations like 'done', 'pushed', 'committed', file edits without context, or obvious status updates are NOT worth it — just respond with 'all good' and nothing else.
+- If Claude is ASKING A QUESTION or waiting for user input, always clearly state the question. This is the most important thing to communicate.
 - If Claude presents a PLAN, briefly list the key steps (one sentence each) and end with whatever question or confirmation Claude is asking.
-- If the response is short or conversational (greetings, confirmations, simple answers), just repeat it nearly verbatim. Do NOT over-explain or analyze it.
-- If the response describes code changes or technical work, give a brief natural summary of what was done in 2-3 sentences.
+- If the response is short or conversational (greetings, simple answers), just repeat it nearly verbatim. Do NOT over-explain.
+- If the response describes meaningful code changes or technical work, give a brief summary in 2-3 sentences.
 
 Here's what Claude said:
 ${RESPONSE:0:4000}" | "$CLAUDE_BIN" -p --model haiku 2>/dev/null || true)
