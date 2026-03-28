@@ -6,7 +6,7 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 ## How it works
 
-1. Claude finishes a response (or asks an interactive question)
+1. Claude finishes a response
 2. The response is summarized into 2-3 natural sentences (using Claude Haiku)
 3. The summary is spoken aloud via OpenAI TTS (or macOS `say` as fallback)
 
