@@ -5,13 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired (v2.1.0) ==="
-
-# Load config (OpenAI API key)
-CONFIG_FILE="$HOME/.config/outloud.env"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-fi
+log "=== Hook fired (v2.2.0) ==="
 
 # Prevent recursive calls — claude -p triggers Stop hooks too
 LOCK_FILE="/tmp/outloud.lock"
@@ -25,41 +19,48 @@ if [ -f "$LOCK_FILE" ]; then
     fi
 fi
 
-# Ensure lock is always cleaned up, even on crash
-cleanup() { rm -f "$LOCK_FILE"; }
-trap cleanup EXIT
-
-# Read hook input from stdin
+# Read hook input from stdin (must happen before backgrounding)
 INPUT=$(cat)
 
-# Get response from last_assistant_message or transcript
-RESPONSE=$(echo "$INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null || true)
-
-if [ -z "$RESPONSE" ]; then
-    TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || true)
-    if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
-        RESPONSE=$(tail -200 "$TRANSCRIPT_PATH" | \
-            grep -E '"type"\s*:\s*"assistant"' | tail -1 | \
-            jq -r '[.message.content[] | select(.type == "text") | .text] | join(" ")' 2>/dev/null || true)
+# Fork everything into background so hook returns immediately
+(
+    # Load config (OpenAI API key)
+    CONFIG_FILE="$HOME/.config/outloud.env"
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
     fi
-fi
 
-[ -z "$RESPONSE" ] && { log "No response found"; exit 0; }
+    # Get response from last_assistant_message or transcript
+    RESPONSE=$(echo "$INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null || true)
 
-# Find claude binary
-CLAUDE_BIN=""
-for candidate in "$HOME/.local/bin/claude" "$HOME/.claude/local/bin/claude" "/usr/local/bin/claude"; do
-    if [ -x "$candidate" ]; then
-        CLAUDE_BIN="$candidate"
-        break
+    if [ -z "$RESPONSE" ]; then
+        TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null || true)
+        if [ -n "$TRANSCRIPT_PATH" ] && [ -f "$TRANSCRIPT_PATH" ]; then
+            RESPONSE=$(tail -200 "$TRANSCRIPT_PATH" | \
+                grep -E '"type"\s*:\s*"assistant"' | tail -1 | \
+                jq -r '[.message.content[] | select(.type == "text") | .text] | join(" ")' 2>/dev/null || true)
+        fi
     fi
-done
 
-# Summarize
-if [ -n "$CLAUDE_BIN" ]; then
-    touch "$LOCK_FILE"
-    log "Starting Haiku summarization..."
-    SUMMARY=$(echo "You convert a coding AI's response into something that can be spoken aloud. No markdown, no code, no bullet points, no asterisks — just natural speech.
+    if [ -z "$RESPONSE" ]; then
+        log "No response found"
+        exit 0
+    fi
+
+    # Find claude binary
+    CLAUDE_BIN=""
+    for candidate in "$HOME/.local/bin/claude" "$HOME/.claude/local/bin/claude" "/usr/local/bin/claude"; do
+        if [ -x "$candidate" ]; then
+            CLAUDE_BIN="$candidate"
+            break
+        fi
+    done
+
+    # Summarize
+    if [ -n "$CLAUDE_BIN" ]; then
+        touch "$LOCK_FILE"
+        log "Starting Haiku summarization..."
+        SUMMARY=$(echo "You convert a coding AI's response into something that can be spoken aloud. No markdown, no code, no bullet points, no asterisks — just natural speech.
 
 Rules:
 - First, decide if this response is worth reading aloud. Routine confirmations like 'done', 'pushed', 'committed', file edits without context, or obvious status updates are NOT worth it — just respond with 'all good' and nothing else.
@@ -70,47 +71,49 @@ Rules:
 
 Here's what Claude said:
 ${RESPONSE:0:4000}" | "$CLAUDE_BIN" -p --model haiku 2>/dev/null || true)
-    log "Haiku done: ${SUMMARY:0:200}"
-fi
+        rm -f "$LOCK_FILE"
+        log "Haiku done: ${SUMMARY:0:200}"
+    fi
 
-# Fallback: first two sentences
-if [ -z "$SUMMARY" ]; then
-    SUMMARY=$(echo "$RESPONSE" | sed 's/[#*`_~]//g' | tr '\n' ' ' | sed 's/  */ /g' | grep -oE '^[^.!?]*[.!?]' | head -2 | tr '\n' ' ' || true)
-    [ -z "$SUMMARY" ] && SUMMARY="${RESPONSE:0:300}"
-fi
+    # Fallback: first two sentences
+    if [ -z "$SUMMARY" ]; then
+        SUMMARY=$(echo "$RESPONSE" | sed 's/[#*`_~]//g' | tr '\n' ' ' | sed 's/  */ /g' | grep -oE '^[^.!?]*[.!?]' | head -2 | tr '\n' ' ' || true)
+        [ -z "$SUMMARY" ] && SUMMARY="${RESPONSE:0:300}"
+    fi
 
-log "Speaking: $SUMMARY"
+    log "Speaking: $SUMMARY"
 
-# Playback speed (configurable via OUTLOUD_SPEED in ~/.config/outloud.env)
-SPEED="${OUTLOUD_SPEED:-1.5}"
-SAY_RATE="${OUTLOUD_SAY_RATE:-210}"
+    # Playback speed (configurable via OUTLOUD_SPEED in ~/.config/outloud.env)
+    SPEED="${OUTLOUD_SPEED:-1.5}"
+    SAY_RATE="${OUTLOUD_SAY_RATE:-210}"
 
-# Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
-AUDIO_FILE="/tmp/outloud-speech.wav"
+    # Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
+    AUDIO_FILE="/tmp/outloud-speech.wav"
 
-if [ -n "$OPENAI_API_KEY" ]; then
-    log "Starting OpenAI TTS..."
-    HTTP_CODE=$(curl -s -o "$AUDIO_FILE" -w "%{http_code}" \
-        https://api.openai.com/v1/audio/speech \
-        -H "Authorization: Bearer $OPENAI_API_KEY" \
-        -H "Content-Type: application/json" \
-        -d "$(jq -n --arg text "$SUMMARY" '{
-            model: "tts-1",
-            voice: "nova",
-            input: $text,
-            response_format: "wav"
-        }')" 2>/dev/null)
+    if [ -n "$OPENAI_API_KEY" ]; then
+        log "Starting OpenAI TTS..."
+        HTTP_CODE=$(curl -s -o "$AUDIO_FILE" -w "%{http_code}" \
+            https://api.openai.com/v1/audio/speech \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg text "$SUMMARY" '{
+                model: "tts-1",
+                voice: "nova",
+                input: $text,
+                response_format: "wav"
+            }')" 2>/dev/null)
 
-    log "OpenAI TTS done (HTTP $HTTP_CODE)"
-    if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
-        afplay -r "$SPEED" "$AUDIO_FILE" 2>/dev/null &
+        log "OpenAI TTS done (HTTP $HTTP_CODE)"
+        if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
+            afplay -r "$SPEED" "$AUDIO_FILE" 2>/dev/null &
+        else
+            log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
+            say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
+        fi
     else
-        log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
+        log "No OPENAI_API_KEY, using macOS say"
         say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
     fi
-else
-    log "No OPENAI_API_KEY, using macOS say"
-    say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
-fi
+) &
 
 exit 0
