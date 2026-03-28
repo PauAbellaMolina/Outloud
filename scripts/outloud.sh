@@ -41,11 +41,10 @@ case "${1:-help}" in
         fi
         ;;
     shutup|stop)
-        PID_FILE="/tmp/outloud-say.pid"
-        if [ -f "$PID_FILE" ]; then
-            kill "$(cat "$PID_FILE")" 2>/dev/null
-            rm -f "$PID_FILE"
-        fi
+        # Kill all sessions
+        for f in /tmp/outloud-say*.pid; do
+            [ -f "$f" ] && kill "$(cat "$f")" 2>/dev/null && rm -f "$f"
+        done
         pkill -f "say -v Samantha" 2>/dev/null
         pkill -f "afplay /tmp/outloud-speech" 2>/dev/null
         echo "Outloud silenced"
