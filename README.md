@@ -17,20 +17,21 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 /plugin install outloud@PauAbellaMolina/Outloud
 ```
 
-## Configuration
+## Better voice (optional)
 
-All settings go in `~/.config/outloud.env`:
+By default, Outloud uses the built-in macOS `say` voice. For a much better voice, add an OpenAI API key:
 
 ```bash
-mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
-OPENAI_API_KEY=your-key-here
-OUTLOUD_SPEED=1.5
-EOF
+mkdir -p ~/.config && echo "OPENAI_API_KEY=your-key-here" > ~/.config/outloud.env
 ```
+
+Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (requires paid account).
+
+You can also configure playback speed in the same file:
 
 | Setting | Description | Default |
 |---------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key for high-quality TTS. Without it, falls back to macOS `say`. Get one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | — |
+| `OPENAI_API_KEY` | Enables high-quality OpenAI TTS voice | — |
 | `OUTLOUD_SPEED` | Playback speed for OpenAI TTS (1.0 = normal, 2.0 = 2x fast) | `1.5` |
 | `OUTLOUD_SAY_RATE` | Words per minute for macOS `say` fallback | `210` |
 
