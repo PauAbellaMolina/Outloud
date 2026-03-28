@@ -14,7 +14,6 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 - macOS
 - Claude Code CLI
-- `jq` — a lightweight JSON parser (`brew install jq`)
 
 ## Install
 
