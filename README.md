@@ -2,7 +2,7 @@
 
 Voice summaries for Claude Code. Hear what Claude just did — spoken aloud after every response.
 
-When Claude finishes responding, Outloud summarizes the response into natural speech and reads it out loud. It also reads interactive questions (like plan confirmations) so you always know when Claude needs your input. Great for staying in the loop without staring at the screen.
+When Claude finishes responding, Outloud summarizes the response into natural speech and reads it out loud. Great for staying in the loop without staring at the screen.
 
 ## How it works
 
