@@ -19,7 +19,7 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 ## Better voice (optional)
 
-By default, Outloud uses the built-in macOS `say` voice. For a much better voice, add an OpenAI API key:
+For a much better voice, get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works) and run this command with it:
 
 ```bash
 mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
@@ -27,8 +27,6 @@ OPENAI_API_KEY=your-key-here
 OUTLOUD_SPEED=1.5
 EOF
 ```
-
-Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works).
 
 You can also configure playback speed in the same file:
 
