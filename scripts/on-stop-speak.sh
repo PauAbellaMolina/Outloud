@@ -102,7 +102,7 @@ if [ -n "$OPENAI_API_KEY" ]; then
         }')" 2>/dev/null)
 
     if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
-        afplay -r 1.5 "$AUDIO_FILE" 2>/dev/null &
+        afplay -r 2 "$AUDIO_FILE" 2>/dev/null &
         echo $! > "$PID_FILE"
     else
         log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
