@@ -87,7 +87,7 @@ fi
 log "Speaking: $SUMMARY"
 
 # Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
-AUDIO_FILE="/tmp/outloud-speech.mp3"
+AUDIO_FILE="/tmp/outloud-speech.wav"
 
 if [ -n "$OPENAI_API_KEY" ]; then
     log "Starting OpenAI TTS..."
@@ -99,7 +99,7 @@ if [ -n "$OPENAI_API_KEY" ]; then
             model: "tts-1",
             voice: "nova",
             input: $text,
-            response_format: "mp3"
+            response_format: "wav"
         }')" 2>/dev/null)
 
     log "OpenAI TTS done (HTTP $HTTP_CODE)"
