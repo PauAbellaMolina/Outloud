@@ -13,28 +13,9 @@ if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
 
-# Defaults (may be overridden by session ID)
-PID_FILE="/tmp/outloud-say.pid"
-AUDIO_FILE="/tmp/outloud-speech.wav"
-
 # Read hook input
 INPUT=$(cat)
 log "Elicitation input: ${INPUT:0:500}"
-
-# Get session ID for per-session files
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
-if [ -n "$SESSION_ID" ]; then
-    SHORT_ID="${SESSION_ID:0:8}"
-    PID_FILE="/tmp/outloud-say-${SHORT_ID}.pid"
-    AUDIO_FILE="/tmp/outloud-speech-${SHORT_ID}.wav"
-    log "Session: $SHORT_ID"
-fi
-
-# Kill any ongoing speech for this session
-if [ -f "$PID_FILE" ]; then
-    kill "$(cat "$PID_FILE")" 2>/dev/null
-    rm -f "$PID_FILE"
-fi
 
 # Extract the message/question from the elicitation
 MESSAGE=$(echo "$INPUT" | jq -r '.message // .title // .description // empty' 2>/dev/null || true)
@@ -58,6 +39,7 @@ log "Speaking elicitation: $SPOKEN"
 # Playback speed
 SPEED="${OUTLOUD_SPEED:-1.5}"
 SAY_RATE="${OUTLOUD_SAY_RATE:-210}"
+AUDIO_FILE="/tmp/outloud-speech.wav"
 
 if [ -n "$OPENAI_API_KEY" ]; then
     log "Starting OpenAI TTS..."
@@ -75,15 +57,12 @@ if [ -n "$OPENAI_API_KEY" ]; then
     log "OpenAI TTS done (HTTP $HTTP_CODE)"
     if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
         afplay -r "$SPEED" "$AUDIO_FILE" 2>/dev/null &
-        echo $! > "$PID_FILE"
     else
         log "OpenAI TTS failed, falling back to say"
         say -v Samantha -r "$SAY_RATE" "$SPOKEN" 2>/dev/null &
-        echo $! > "$PID_FILE"
     fi
 else
     say -v Samantha -r "$SAY_RATE" "$SPOKEN" 2>/dev/null &
-    echo $! > "$PID_FILE"
 fi
 
 exit 0

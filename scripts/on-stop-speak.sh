@@ -5,7 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired (v1.8.0) ==="
+log "=== Hook fired (v1.9.0) ==="
 
 # Load config (OpenAI API key)
 CONFIG_FILE="$HOME/.config/outloud.env"
@@ -13,22 +13,9 @@ if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
 
-# Kill any ongoing speech from a previous response (defaults, may be overridden by session ID)
-PID_FILE="/tmp/outloud-say.pid"
-LOCK_FILE="/tmp/outloud.lock"
-AUDIO_FILE="/tmp/outloud-speech.wav"
-if [ -f "$PID_FILE" ]; then
-    OLD_PID=$(cat "$PID_FILE")
-    if kill -0 "$OLD_PID" 2>/dev/null; then
-        kill "$OLD_PID" 2>/dev/null
-        log "Killed previous say process ($OLD_PID)"
-    fi
-    rm -f "$PID_FILE"
-fi
-
 # Prevent recursive calls — claude -p triggers Stop hooks too
+LOCK_FILE="/tmp/outloud.lock"
 if [ -f "$LOCK_FILE" ]; then
-    # Clean up stale locks older than 60 seconds
     if [ "$(find "$LOCK_FILE" -mmin +1 2>/dev/null)" ]; then
         log "Removing stale lock"
         rm -f "$LOCK_FILE"
@@ -44,16 +31,6 @@ trap cleanup EXIT
 
 # Read hook input from stdin
 INPUT=$(cat)
-
-# Get session ID for per-session PID/lock/audio files
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null || true)
-if [ -n "$SESSION_ID" ]; then
-    SHORT_ID="${SESSION_ID:0:8}"
-    PID_FILE="/tmp/outloud-say-${SHORT_ID}.pid"
-    LOCK_FILE="/tmp/outloud-${SHORT_ID}.lock"
-    AUDIO_FILE="/tmp/outloud-speech-${SHORT_ID}.wav"
-    log "Session: $SHORT_ID"
-fi
 
 # Get response from last_assistant_message or transcript
 RESPONSE=$(echo "$INPUT" | jq -r '.last_assistant_message // empty' 2>/dev/null || true)
@@ -108,6 +85,7 @@ SPEED="${OUTLOUD_SPEED:-1.5}"
 SAY_RATE="${OUTLOUD_SAY_RATE:-210}"
 
 # Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
+AUDIO_FILE="/tmp/outloud-speech.wav"
 
 if [ -n "$OPENAI_API_KEY" ]; then
     log "Starting OpenAI TTS..."
@@ -125,16 +103,13 @@ if [ -n "$OPENAI_API_KEY" ]; then
     log "OpenAI TTS done (HTTP $HTTP_CODE)"
     if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
         afplay -r "$SPEED" "$AUDIO_FILE" 2>/dev/null &
-        echo $! > "$PID_FILE"
     else
         log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
         say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
-        echo $! > "$PID_FILE"
     fi
 else
     log "No OPENAI_API_KEY, using macOS say"
     say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
-    echo $! > "$PID_FILE"
 fi
 
 exit 0

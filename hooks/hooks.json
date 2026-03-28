@@ -33,17 +33,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/shutup.sh",
-            "timeout": 5
-          }
-        ]
-      }
     ]
   }
 }

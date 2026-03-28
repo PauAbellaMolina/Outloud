@@ -41,10 +41,6 @@ case "${1:-help}" in
         fi
         ;;
     shutup|stop)
-        # Kill all sessions
-        for f in /tmp/outloud-say*.pid; do
-            [ -f "$f" ] && kill "$(cat "$f")" 2>/dev/null && rm -f "$f"
-        done
         pkill -f "say -v Samantha" 2>/dev/null
         pkill -f "afplay /tmp/outloud-speech" 2>/dev/null
         echo "Outloud silenced"
