@@ -63,7 +63,7 @@ INPUT=$(cat)
         SUMMARY=$(echo "You convert a coding AI's response into something that can be spoken aloud. No markdown, no code, no bullet points, no asterisks — just natural speech.
 
 Rules:
-- First, decide if this response is worth reading aloud. Routine confirmations like 'done', 'pushed', 'committed', file edits without context, or obvious status updates are NOT worth it — just respond with 'all good' and nothing else.
+- First, decide if this response is worth reading aloud. Routine confirmations like 'done', 'pushed', 'committed', file edits without context, or obvious status updates are NOT worth it — just respond with something very short and nothing else.
 - If Claude is ASKING A QUESTION or waiting for user input, always clearly state the question. This is the most important thing to communicate.
 - If Claude presents a PLAN, briefly list the key steps (one sentence each) and end with whatever question or confirmation Claude is asking.
 - If the response is short or conversational (greetings, simple answers), just repeat it nearly verbatim. Do NOT over-explain.
