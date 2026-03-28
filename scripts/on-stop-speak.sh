@@ -5,7 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired ==="
+log "=== Hook fired (v1.1.0) ==="
 
 # Load config (OpenAI API key)
 CONFIG_FILE="$HOME/.config/outloud.env"
@@ -70,11 +70,12 @@ done
 # Summarize
 if [ -n "$CLAUDE_BIN" ]; then
     touch "$LOCK_FILE"
+    log "Starting Haiku summarization..."
     SUMMARY=$(echo "You are a voice assistant giving a spoken summary of what a coding AI just did. Give a natural, conversational summary in 3-5 sentences — enough to understand the key points without reading the screen. Cover the main concepts or changes, not just the first line. No markdown, no code, no bullet points, no asterisks — just natural flowing speech as if you're explaining it to someone walking next to you.
 
 Here's what Claude said:
 ${RESPONSE:0:4000}" | "$CLAUDE_BIN" -p --model haiku 2>/dev/null || true)
-    log "claude summary: ${SUMMARY:0:200}"
+    log "Haiku done: ${SUMMARY:0:200}"
 fi
 
 # Fallback: first two sentences
@@ -89,7 +90,7 @@ log "Speaking: $SUMMARY"
 AUDIO_FILE="/tmp/outloud-speech.mp3"
 
 if [ -n "$OPENAI_API_KEY" ]; then
-    log "Using OpenAI TTS"
+    log "Starting OpenAI TTS..."
     HTTP_CODE=$(curl -s -o "$AUDIO_FILE" -w "%{http_code}" \
         https://api.openai.com/v1/audio/speech \
         -H "Authorization: Bearer $OPENAI_API_KEY" \
@@ -101,6 +102,7 @@ if [ -n "$OPENAI_API_KEY" ]; then
             response_format: "mp3"
         }')" 2>/dev/null)
 
+    log "OpenAI TTS done (HTTP $HTTP_CODE)"
     if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
         afplay -r 2 "$AUDIO_FILE" 2>/dev/null &
         echo $! > "$PID_FILE"
