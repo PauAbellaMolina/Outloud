@@ -5,7 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired (v1.2.0) ==="
+log "=== Hook fired (v1.3.0) ==="
 
 # Load config (OpenAI API key)
 CONFIG_FILE="$HOME/.config/outloud.env"
@@ -71,7 +71,11 @@ done
 if [ -n "$CLAUDE_BIN" ]; then
     touch "$LOCK_FILE"
     log "Starting Haiku summarization..."
-    SUMMARY=$(echo "You are a voice assistant giving a spoken summary of what a coding AI just did. Give a natural, conversational summary in 3-5 sentences — enough to understand the key points without reading the screen. Cover the main concepts or changes, not just the first line. No markdown, no code, no bullet points, no asterisks — just natural flowing speech as if you're explaining it to someone walking next to you.
+    SUMMARY=$(echo "You convert a coding AI's response into something that can be spoken aloud. Keep it to 2-3 sentences max. No markdown, no code, no bullet points, no asterisks — just natural speech.
+
+Rules:
+- If the response is short or conversational (greetings, confirmations, simple answers), just repeat it nearly verbatim. Do NOT over-explain or analyze it.
+- If the response describes code changes or technical work, give a brief natural summary of what was done.
 
 Here's what Claude said:
 ${RESPONSE:0:4000}" | "$CLAUDE_BIN" -p --model haiku 2>/dev/null || true)
