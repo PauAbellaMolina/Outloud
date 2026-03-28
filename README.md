@@ -25,15 +25,22 @@ Speech is automatically interrupted when you send your next message, or when a n
 /plugin install outloud@PauAbellaMolina/Outloud
 ```
 
-## Voice setup
+## Configuration
 
-By default, Outloud uses the built-in macOS `say` voice. For much better voice quality, add an OpenAI API key:
+All settings go in `~/.config/outloud.env`:
 
 ```bash
-mkdir -p ~/.config && echo "OPENAI_API_KEY=your-key-here" > ~/.config/outloud.env
+mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
+OPENAI_API_KEY=your-key-here
+OUTLOUD_SPEED=1.5
+EOF
 ```
 
-Get your key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `OPENAI_API_KEY` | OpenAI API key for high-quality TTS. Without it, falls back to macOS `say`. Get one at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | — |
+| `OUTLOUD_SPEED` | Playback speed for OpenAI TTS (1.0 = normal, 2.0 = 2x fast) | `1.5` |
+| `OUTLOUD_SAY_RATE` | Words per minute for macOS `say` fallback | `210` |
 
 ## Uninstall
 

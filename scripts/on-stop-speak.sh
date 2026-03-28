@@ -5,7 +5,7 @@
 LOG_FILE="/tmp/outloud.log"
 log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG_FILE"; }
 
-log "=== Hook fired (v1.3.0) ==="
+log "=== Hook fired (v1.4.0) ==="
 
 # Load config (OpenAI API key)
 CONFIG_FILE="$HOME/.config/outloud.env"
@@ -90,6 +90,10 @@ fi
 
 log "Speaking: $SUMMARY"
 
+# Playback speed (configurable via OUTLOUD_SPEED in ~/.config/outloud.env)
+SPEED="${OUTLOUD_SPEED:-1.5}"
+SAY_RATE="${OUTLOUD_SAY_RATE:-210}"
+
 # Speak using OpenAI TTS if API key is available, otherwise fall back to macOS say
 AUDIO_FILE="/tmp/outloud-speech.wav"
 
@@ -108,16 +112,16 @@ if [ -n "$OPENAI_API_KEY" ]; then
 
     log "OpenAI TTS done (HTTP $HTTP_CODE)"
     if [ "$HTTP_CODE" = "200" ] && [ -s "$AUDIO_FILE" ]; then
-        afplay -r 2 "$AUDIO_FILE" 2>/dev/null &
+        afplay -r "$SPEED" "$AUDIO_FILE" 2>/dev/null &
         echo $! > "$PID_FILE"
     else
         log "OpenAI TTS failed (HTTP $HTTP_CODE), falling back to say"
-        say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
+        say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
         echo $! > "$PID_FILE"
     fi
 else
     log "No OPENAI_API_KEY, using macOS say"
-    say -v Samantha -r 200 "$SUMMARY" 2>/dev/null &
+    say -v Samantha -r "$SAY_RATE" "$SUMMARY" 2>/dev/null &
     echo $! > "$PID_FILE"
 fi
 
