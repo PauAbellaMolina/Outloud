@@ -20,6 +20,13 @@ set_speed() {
     echo "Outloud speed set to ${1}x"
 }
 
+# If called as "shh", just shutup immediately
+if [ "$(basename "$0")" = "shh" ]; then
+    pkill -f "say -v Samantha" 2>/dev/null
+    pkill -f "afplay /tmp/outloud-speech" 2>/dev/null
+    exit 0
+fi
+
 case "${1:-help}" in
     faster)
         CURRENT=$(get_speed)
