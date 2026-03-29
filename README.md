@@ -12,14 +12,17 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 ## Install
 
-```
-/plugin marketplace add PauAbellaMolina/Outloud
-/plugin install outloud@PauAbellaMolina/Outloud
-```
+Copy and paste this into Claude Code:
+
+> Install the Outloud plugin. Run `/plugin marketplace add PauAbellaMolina/Outloud` and then `/plugin install outloud@PauAbellaMolina/Outloud`.
 
 ## Better voice (optional)
 
-For a much better voice, get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works) and run this command with it:
+For a much better voice, get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works). Then copy and paste this into Claude Code:
+
+> Set up Outloud with my OpenAI API key: `sk-YOUR-KEY-HERE`. Run `mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'` with my key as `OPENAI_API_KEY` and `OUTLOUD_SPEED=1.5`.
+
+Or manually run:
 
 ```bash
 mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
@@ -28,7 +31,7 @@ OUTLOUD_SPEED=1.5
 EOF
 ```
 
-You can also configure playback speed in the same file:
+### Settings
 
 | Setting | Description | Default |
 |---------|-------------|---------|
