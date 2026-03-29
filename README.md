@@ -12,17 +12,36 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 
 ## Install
 
-Copy and paste this into Claude Code:
+<details>
+<summary>Via Claude Code (copy & paste)</summary>
 
-> Install the Outloud plugin. Run `/plugin marketplace add PauAbellaMolina/Outloud` and then `/plugin install outloud@PauAbellaMolina/Outloud`.
+> Install the Outloud voice summaries plugin for Claude Code. Run the slash command `/plugin marketplace add PauAbellaMolina/Outloud` and then `/plugin install outloud@PauAbellaMolina/Outloud`. After installing, give me a summary of how to use it: the plugin speaks a voice summary after every response, I can stop speech with `! shh`, control speed with `! outloud faster` / `! outloud slower`, and optionally set up an OpenAI API key in `~/.config/outloud.env` for a much better voice.
+
+</details>
+
+<details>
+<summary>Manual</summary>
+
+```
+/plugin marketplace add PauAbellaMolina/Outloud
+/plugin install outloud@PauAbellaMolina/Outloud
+```
+
+</details>
 
 ## Better voice (optional)
 
-For a much better voice, get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works). Then copy and paste this into Claude Code:
+For a much better voice, get an API key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys) (add $5 in credits so TTS works).
 
-> Set up Outloud with my OpenAI API key: `sk-YOUR-KEY-HERE`. Run `mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'` with my key as `OPENAI_API_KEY` and `OUTLOUD_SPEED=1.5`.
+<details>
+<summary>Via Claude Code (copy & paste)</summary>
 
-Or manually run:
+> Set up Outloud with OpenAI TTS for better voice quality. My OpenAI API key is: `sk-YOUR-KEY-HERE`. Create the config file at `~/.config/outloud.env` with my key as `OPENAI_API_KEY` and set `OUTLOUD_SPEED=1.5`. After setting it up, let me know it's done and remind me I can adjust speed with `! outloud faster` / `! outloud slower` or by editing `~/.config/outloud.env`.
+
+</details>
+
+<details>
+<summary>Manual</summary>
 
 ```bash
 mkdir -p ~/.config && cat > ~/.config/outloud.env << 'EOF'
@@ -30,6 +49,8 @@ OPENAI_API_KEY=your-key-here
 OUTLOUD_SPEED=1.5
 EOF
 ```
+
+</details>
 
 ### Settings
 
