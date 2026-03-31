@@ -15,7 +15,7 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 <details>
 <summary>Via Claude Code (copy & paste)</summary>
 
-> Install the Outloud voice summaries plugin for Claude Code. Run the slash command `/plugin marketplace add PauAbellaMolina/Outloud` and then `/plugin install outloud@PauAbellaMolina/Outloud`. After installing, give me a summary of how to use it: the plugin speaks a voice summary after every response, I can stop speech with `! shh`, control speed with `! outloud faster` / `! outloud slower`, and optionally set up an OpenAI API key in `~/.config/outloud.env` for a much better voice.
+> Install the Outloud voice summaries plugin for Claude Code. Run the slash command `/plugin marketplace add PauAbellaMolina/Outloud` and then `/plugin install outloud@PauAbellaMolina/Outloud`. After installing, run `/reload plugins` to activate it. Then give me a summary of how to use it: the plugin speaks a voice summary after every response, I can stop speech with `! shh`, control speed with `! outloud faster` / `! outloud slower`, and optionally set up an OpenAI API key in `~/.config/outloud.env` for a much better voice.
 
 </details>
 
@@ -25,6 +25,7 @@ When Claude finishes responding, Outloud summarizes the response into natural sp
 ```
 /plugin marketplace add PauAbellaMolina/Outloud
 /plugin install outloud@PauAbellaMolina/Outloud
+/reload plugins
 ```
 
 </details>
